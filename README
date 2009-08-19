@@ -1,0 +1,19 @@
+MailNotification
+A MediaWiki plugin to email recent changes to all registered wiki users based up on http://www.mediawiki.org/wiki/Extension:MailNotification
+Adam Wolf
+http://adamwolf.org
+
+This was originally written by Ramin Dalkouhi and has not been updated in some time.  It no longer functioned on new MediaWiki installs.  I updated so it did.
+
+I've used it on wikis that I have had to lock down so the RSS feeds are not available.
+
+Usage
+=====
+A few configuration settings can be changed in MailNotification.configuration.php.
+
+Otherwise, set a cronjob to run MailNotification.cronjob.php.  When it runs, all the registered users will be sent an email with a summary of the changes since the last email was sent.
+
+Installation
+============
+Copy the files to your extensions folder and register the MailNotification plugin by adding the following line to your LocalSettings.php:
+    require_once("extensions/MailNotification.php");
