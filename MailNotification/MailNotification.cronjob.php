@@ -1,7 +1,11 @@
 <?php
 
-require_once( "../maintenance/commandLine.inc" );
-require_once( "MailNotification.configuration.php" );
+
+define('ABSPATH', dirname(__FILE__).'/');
+
+require_once( ABSPATH."../../maintenance/commandLine.inc" );
+require_once( ABSPATH."../../includes/DatabaseFunctions.php");
+require_once( ABSPATH."MailNotification.configuration.php" );
 
 
 
@@ -37,16 +41,16 @@ function createMailContent(&$numberOfRows)
 {
 	global $introduction, $signature;
 
-	$sql = "SELECT dc_timestamp, dc_title, dc_url, dc_user, dc_real_name, dc_mail, dc_minor from wiki_dailychanges";
+	$sql = "SELECT dc_timestamp, dc_title, dc_summary, dc_url, dc_user, dc_real_name, dc_mail, dc_minor from wiki_dailychanges";
 	$res = wfQuery($sql, DB_SLAVE);
 
 	$content = $introduction;
 
 	$numberOfRows = 0;
-	while ( $line = wfFetchObject( $res ) )
+	while ( $line = wfFetchObject( $res, DB_SLAVE) )
 	{
-		$data[] = array($line->dc_timestamp, $line->dc_title, $line->dc_url, $line->dc_user, $line->dc_real_name, $line->dc_mail, $line->dc_minor);
-		$content .= '<a href="' . $line->dc_url . '" target="blank">' . $line->dc_title . '</a> has been added/changed by user/ip ';
+		$data[] = array($line->dc_timestamp, $line->dc_title, $line->dc_summary, $line->dc_url, $line->dc_user, $line->dc_real_name, $line->dc_mail, $line->dc_minor);
+		
 		
 		if (strlen($line->dc_mail) > 0)
 		{
@@ -65,10 +69,15 @@ function createMailContent(&$numberOfRows)
 			$content .= '</a>';
 		}
 		
+		$content .= ' edited <a href="' . $line->dc_url . '" target="blank">' . $line->dc_title . '</a>';
+		
+		$content .= ' (' . $line->dc_summary . ')';
+		
 		if ($line->dc_minor > 0)
 		{
-			$content .= ' as a minor edit';
+			$content .= ' (Minor edit)';
 		}
+		
 		
 		$content .= '<br/>';
 
@@ -77,7 +86,7 @@ function createMailContent(&$numberOfRows)
 
 	$content .= $signature;
 
-	wfFreeResult( $res );
+	wfFreeResult( $res , DB_SLAVE );
 	
 	return $content;
 }
@@ -92,10 +101,10 @@ function getUsers()
 {
 	$users = array();
 	
-	$sql = "SELECT user_name, user_real_name, user_email from wiki_user";
+	$sql = "SELECT user_name, user_real_name, user_email from user";
 	$res = wfQuery($sql, DB_SLAVE);
 
-	while ( $line = wfFetchObject( $res ) )
+	while ( $line = wfFetchObject( $res, DB_SLAVE ) )
 	{
 		if (strlen($line->user_email) == 0)
 			continue;
@@ -106,7 +115,7 @@ function getUsers()
 			$users[$line->user_name] = $line->user_email;
 	}
 
-	wfFreeResult( $res );
+	wfFreeResult( $res , DB_SLAVE);
 	
 	return $users;
 }

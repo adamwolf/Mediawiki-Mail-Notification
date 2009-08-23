@@ -1,5 +1,7 @@
 <?php
 
+require_once("DatabaseFunctions.php");
+
 if ( ! defined( 'MEDIAWIKI' ) )
 	die();
 
@@ -27,12 +29,13 @@ class MailNotification
 		$sql = "CREATE TABLE IF NOT EXISTS wiki_dailychanges (
 			  dc_timestamp varchar(14) binary NOT NULL default '',
 			  dc_title varchar(255) binary NOT NULL default '',
+			  dc_summary varchar(255) binary NOT NULL default '',
 			  dc_url varchar(255) binary NOT NULL default '',
 			  dc_user varchar(255) binary NOT NULL default '',
 			  dc_real_name varchar(255) binary NOT NULL default '',
 			  dc_mail varchar(255) binary NOT NULL default '',
 			  dc_minor tinyint(3) unsigned NOT NULL default '0'
-		) TYPE=MyISAM PACK_KEYS=1;";
+) TYPE=MyISAM PACK_KEYS=1;";
 		wfQuery( $sql, DB_MASTER );
 	}
 	
@@ -51,10 +54,10 @@ class MailNotification
 		$now      = wfTimestampNow();
 
 		$sql = 
-			"INSERT INTO wiki_dailychanges (dc_timestamp, dc_title, dc_url, dc_user, " .
+			"INSERT INTO wiki_dailychanges (dc_timestamp, dc_title, dc_summary, dc_url, dc_user, " .
 			"dc_real_name, dc_mail, dc_minor) values ('" . mysql_real_escape_string($now) . "', '" .
-			mysql_real_escape_string($title) . "', " .
-			"'" . mysql_real_escape_string($url) . "', '" . mysql_real_escape_string($userName) . 
+			mysql_real_escape_string($title) . "', '" . mysql_real_escape_string($summary) . "', '" .
+			mysql_real_escape_string($url) . "', '" . mysql_real_escape_string($userName) . 
 			"', '" . mysql_real_escape_string($realName) . "', '" . mysql_real_escape_string($email) . 
 			"', '" . mysql_real_escape_string($isminor) . "')";
 
